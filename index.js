@@ -1,78 +1,35 @@
 'use strict';
 
-const Message = require('./Message');
-const Base = require('./Base');
+const Constants = require('./src/util/Constants');
 
-/**
- * Selected poll option structure
- * @typedef {Object} SelectedPollOption
- * @property {number} id The local selected or deselected option ID
- * @property {string} name The option name
- */
+module.exports = {
+    Client: require('./src/Client'),
 
-/**
- * Represents a Poll Vote on WhatsApp
- * @extends {Base}
- */
-class PollVote extends Base {
-    constructor(client, data) {
-        super(client);
+    version: require('./package.json').version,
 
-        if (data) this._patch(data);
-    }
+    // Structures
+    Chat: require('./src/structures/Chat'),
+    PrivateChat: require('./src/structures/PrivateChat'),
+    GroupChat: require('./src/structures/GroupChat'),
+    Channel: require('./src/structures/Channel'),
+    Message: require('./src/structures/Message'),
+    MessageMedia: require('./src/structures/MessageMedia'),
+    Contact: require('./src/structures/Contact'),
+    PrivateContact: require('./src/structures/PrivateContact'),
+    BusinessContact: require('./src/structures/BusinessContact'),
+    ClientInfo: require('./src/structures/ClientInfo'),
+    Location: require('./src/structures/Location'),
+    Poll: require('./src/structures/Poll'),
+    ScheduledEvent: require('./src/structures/ScheduledEvent'),
+    ProductMetadata: require('./src/structures/ProductMetadata'),
+    List: require('./src/structures/List'),
+    Buttons: require('./src/structures/Buttons'),
+    Broadcast: require('./src/structures/Broadcast'),
 
-    _patch(data) {
-        /**
-         * The person who voted
-         * @type {string}
-         */
-        this.voter = data.sender;
+    // Auth Strategies
+    NoAuth: require('./src/authStrategies/NoAuth'),
+    LocalAuth: require('./src/authStrategies/LocalAuth'),
+    RemoteAuth: require('./src/authStrategies/RemoteAuth'),
 
-        /**
-         * The selected poll option(s)
-         * If it's an empty array, the user hasn't selected any options on the poll,
-         * may occur when they deselected all poll options
-         * @type {SelectedPollOption[]}
-         */
-        if (data.selectedOptionLocalIds.length > 0) {
-            if (data.parentMessage) {
-                // temporary failsafe
-                this.selectedOptions = data.selectedOptionLocalIds.map((e) => ({
-                    name: data.parentMessage.pollOptions.find(
-                        (x) => x.localId === e,
-                    ).name,
-                    localId: e,
-                }));
-            } else {
-                this.selectedOptions = data.selectedOptionLocalIds.map((e) => ({
-                    name: undefined,
-                    localId: e,
-                }));
-            }
-        } else {
-            this.selectedOptions = [];
-        }
-
-        /**
-         * Timestamp the option was selected or deselected at
-         * @type {number}
-         */
-        this.interractedAtTs = data.senderTimestampMs;
-
-        /**
-         * The poll creation message associated with the poll vote
-         * @type {Message}
-         */
-        this.parentMessage = new Message(this.client, data.parentMessage);
-
-        /**
-         * The poll creation message id
-         * @type {Object}
-         */
-        this.parentMsgKey = data.parentMsgKey;
-
-        return super._patch(data);
-    }
-}
-
-module.exports = PollVote;
+    ...Constants,
+};
